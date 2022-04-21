@@ -11,7 +11,7 @@ canvas.style.border = `1px solid `;
 canvas.style.zIndex = -1;
 document.body.style.margin = '10 px'
 canvasWidth = window.innerWidth - 20
-canvasHeight = window.innerHeight - 30
+canvasHeight = window.innerHeight - 50
 
 function resize(){
     canvas.width = canvasWidth
@@ -49,7 +49,15 @@ window.addEventListener('touchend', ()=>{
     isChaseMouse = false;
 })
 
-var scale = 1
+var isRepulsion = false;
+var isAlignment = false;
+var isAttraction = false;
+const setRepulsion = ()=>{isRepulsion = !isRepulsion;}
+const setAlignment = ()=>{isAlignment = !isAlignment;}
+const setAttraction = ()=>{isAttraction = !isAttraction;}
+
+
+var scale = 0.7
 var howManyBirds = 300
 
 // stable
@@ -102,15 +110,20 @@ function Bird(startAngle, x, y){
             this.sumDeltaY += this.deltaY
 
             //alignment
+            
             if (this.distanceToOtherBird > alignmentZone){continue birdloop}
+            if (isAlignment){
                 this.viewAngleDiff = this.movementDirection - birds[j].movementDirection
                 if (Math.abs(this.viewAngleDiff)>Math.PI){
                     this.viewAngleDiff -= Math.sign(this.viewAngleDiff)*Math.PI
                 }
                 this.movementDirection -= this.viewAngleDiff/this.distanceToOtherBird*alignmentSpeed    
 
+            }
+
             //repulsion
-                if (this.distanceToOtherBird > repulsionZone){continue birdloop}
+            if (this.distanceToOtherBird > repulsionZone){continue birdloop}
+            if (isRepulsion){
                 if (this.angeleDiff>0 ){
                     this.movementDirection -= repulsionSpeed/this.distanceToOtherBird**repulsionPot
                 } 
@@ -118,8 +131,11 @@ function Bird(startAngle, x, y){
                     this.movementDirection += repulsionSpeed/this.distanceToOtherBird**repulsionPot
                 } 
 
+            }
+
         }
         // attraction
+        if (isAttraction){
             this.angleToOther = mod(Math.atan2(this.sumDeltaY, this.sumDeltaY),Math.PI*2)
             this.angeleDiff = mod(this.movementDirection - this.angleToOther,Math.PI*2) - Math.PI
             if (this.angeleDiff>0 ){
@@ -128,7 +144,7 @@ function Bird(startAngle, x, y){
             else {
                 this.movementDirection -= attracionSpeed
             }
-
+        }
 
         //avoid the mouse
         if (isChaseMouse){
